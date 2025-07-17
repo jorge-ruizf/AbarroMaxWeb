@@ -9,12 +9,12 @@ import com.mongodb.client.model.Updates;
 import java.util.ArrayList;
 import org.bson.Document;
 
-public class VehiculoRepositorio {
+public class ProductRepository {
 
     private final MongoDatabase database;
     private final MongoCollection<Document> productCollection;
 
-    public VehiculoRepositorio() {
+    public ProductRepository() {
         var client = MongoClients.create("mongodb://localhost:27017");
         database = client.getDatabase("AbarroMaxWeb");
         productCollection = database.getCollection("Products");
@@ -25,21 +25,14 @@ public class VehiculoRepositorio {
         ArrayList<Product> products = new ArrayList<>();
         try {
             for (Document doc : productsDocuments) {
-                var vehiculo = Product.fromDocument(doc);
-                products.add(vehiculo);
+                var product = Product.fromDocument(doc);
+                products.add(product);
             }
-
             return products;
         } catch (Exception exe) {
-            throw new Exception("Ha ocurrido un error, contacte al Admin: " + exe.getMessage());
+            throw new Exception("Error al obtener productos: " + exe.getMessage());
         }
     }
-    
-    public boolean idExiste(int id) {
-        Document doc = productCollection.find(Filters.eq("id", id)).first();
-        return doc != null;
-    }
-
 
     public boolean addProduct(Product product) throws Exception {
         try {
@@ -47,14 +40,14 @@ public class VehiculoRepositorio {
             productCollection.insertOne(document);
             return true;
         } catch (Exception exe) {
-            throw new Exception("Ha ocurrido un error, contacte al Admin: " + exe.getMessage());
+            throw new Exception("Error al agregar producto: " + exe.getMessage());
         }
     }
 
-    public boolean updateProduct(Product product, Product productOrigin) throws Exception {
+    public boolean updateProduct(Product product, Product originalProduct) throws Exception {
         try {
-            var result = productCollection.updateOne(
-                Filters.eq("id", productOrigin.getId()),
+            productCollection.updateOne(
+                Filters.eq("id", originalProduct.getId()),
                 Updates.combine(
                     Updates.set("id", product.getId()),
                     Updates.set("name", product.getName()),
@@ -62,21 +55,10 @@ public class VehiculoRepositorio {
                     Updates.set("supplier", product.getSupplier())
                 )
             );
-            return result.getModifiedCount() > 0;
+            System.out.println("Producto actualizado correctamente");
+            return true;
         } catch (Exception exe) {
-            throw new Exception("Ha ocurrido un error, contacte al Admin: " + exe.getMessage());
+            throw new Exception("Error al actualizar producto: " + exe.getMessage());
         }
     }
-
-
-    public boolean deleteProductById(int id) throws Exception {
-        try {
-            var result = productCollection.deleteOne(Filters.eq("id", id));
-            return result.getDeletedCount() > 0;
-        } catch (Exception exe) {
-            throw new Exception("Error al eliminar producto: " + exe.getMessage());
-        }
-    }
-
-
 }

@@ -1,9 +1,3 @@
-<%-- 
-    Document   : vehiculos
-    Created on : 13/06/2025, 7:26:23 p. m.
-    Author     : jufeq
---%>
-
 <%@page import="java.util.List"%>
 <%@page import="java.util.ArrayList"%>
 <%@page import="entities.Product"%>
@@ -27,7 +21,7 @@
                 <div class="col-12">
                     <% List<Product> products = (List<Product>) request.getAttribute("products");%>
                     <table id="example" class="display">
-                        <thead>
+                        <thead class="table-light">
                             <tr>
                                 <th>Id</th>
                                 <th>Name</th>
@@ -35,7 +29,7 @@
                                 <th>Supplier</th>
                                 <th style="text-align: center">Actions</th>
                             </tr>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             <%for (Product product : products) {%>
                             <tr>
                                 <td>
@@ -51,18 +45,18 @@
                                     <%= product.getSupplier()%>
                                 </td>
                                 <td>
-                                    <a class="btn btn-primary" href="SvVehiculos?filtro=Editar;<%= product.getName()%>" role="button">Editar</a>
-                                    <a class="btn btn-danger" href="#" role="button">Eliminar</a>
+                                    <a class="btn btn-primary" href="SvVehiculos?accion=editar&id=<%= product.getId()%>" role="button">Editar</a>
+                                    <a class="btn btn-danger" href="SvVehiculos?accion=eliminar&id=<%= product.getId()%>" role="button" onclick="return confirm('¿Estás seguro de eliminar este vehículo?');">Eliminar</a>
                                 </td>
-                            </tr>                
+                            </tr>              
                             <% }%>
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th>Brand</th>
+                                <th>Id</th>
                                 <th>Name</th>
-                                <th>Type</th>
-                                <th>Year Introduced</th>
+                                <th>CategoryId</th>
+                                <th>Suplieer</th>
                                 <th style="text-align: center">Actions</th>
                             </tr>
                         </tfoot>
@@ -77,7 +71,6 @@
             <div>
                 <div class="col-12 text-end">
                     <a class="btn btn-primary" href="registro_vehiculos.jsp">Nuevo Vehículo</a>
-                    <!--<button type="button" onclick="window.location.href='nuevoVehiculo.jsp'" class="btn btn-primary">Nuevo Vehículo</button>-->
                 </div>
             </div>
         </div>

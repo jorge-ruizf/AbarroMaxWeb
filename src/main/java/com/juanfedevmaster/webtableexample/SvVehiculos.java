@@ -31,63 +31,51 @@ public class SvVehiculos extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String query = request.getQueryString();
-        boolean tieneFiltros = false;
-
-        if (query != null && !query.isBlank()) {
-            tieneFiltros = true;
-        }
-
-        List<Product> products = new ArrayList<>();
+        String accion = request.getParameter("accion");
+        String idStr = request.getParameter("id");
         VehiculoServicio vehiculoServicio = new VehiculoServicio();
 
+        System.out.println("doGet accion: " + accion + ", id: " + idStr);
+        
         try {
-            products = vehiculoServicio.getVehiculos();
+            if (accion != null && idStr != null) {
+                int id = Integer.parseInt(idStr);
 
-            if (tieneFiltros) {
-                String filtros[] = request.getParameter("filtro").split(";");
+                switch (accion) {
+                    case "editar":
+                        List<Product> productos = vehiculoServicio.getVehiculos();
+                        Product productoEditar = productos.stream()
+                                .filter(p -> p.getId() == id)
+                                .findFirst()
+                                .orElse(null);
 
-                switch (filtros[0]) {
-                    /*case "Brand":
-                        products = products.stream()
-                                .filter(x -> x.getBrand().equals(filtros[1]))
-                                .toList();
-                        break;*/
-                    case "Name":
-                        products = products.stream()
-                                .filter(x -> x.getName().equals(filtros[1]))
-                                .toList();
+                        if (productoEditar != null) {
+                            request.setAttribute("productModify", productoEditar);
+                            request.getRequestDispatcher("actualizar_vehiculos.jsp").forward(request, response);
+                            return;
+                        } else {
+                            request.setAttribute("mensaje", "Producto no encontrado");
+                        }
                         break;
-                    /*case "Type":
-                        products = products.stream()
-                                .filter(x -> x.getType().equals(filtros[1]))
-                                .toList();
-                        break;
-                    case "Year Introduce":
-                        products = products.stream()
-                                .filter(x -> x.getYearIntroduced() == Integer.parseInt(filtros[1]))
-                                .toList();
-                        break;*/
-                    case "Editar":
-                        Product vehiculoFiltrado = products.stream()
-                                .filter(x -> x.getName().equals(filtros[1]))
-                                .findFirst().get();
 
-                        request.setAttribute("productModify", vehiculoFiltrado);
-                        RequestDispatcher dispatcherEditar = request.getRequestDispatcher("actualizar_vehiculos.jsp");
-                        dispatcherEditar.forward(request, response);
-
+                    case "eliminar":
+                        boolean eliminado = vehiculoServicio.deleteVehiculoById(id);
+                        if (!eliminado) {
+                            request.setAttribute("mensaje", "No se pudo eliminar el producto con ID " + id);
+                        }
+                        response.sendRedirect("SvVehiculos");
                         return;
                 }
             }
 
+            List<Product> products = vehiculoServicio.getVehiculos();
             request.setAttribute("products", products);
             RequestDispatcher dispatcher = request.getRequestDispatcher("vehiculos.jsp");
-
             dispatcher.forward(request, response);
 
         } catch (Exception ex) {
-            Logger.getLogger(SvVehiculos.class.getName()).log(Level.SEVERE, null, ex);
+            request.setAttribute("mensaje", "Error: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
@@ -100,46 +88,51 @@ public class SvVehiculos extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        boolean editar = (request.getParameter("editar") == null || request.getParameter("editar").isBlank()) ? false : true;
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("Entró a doPost. Editar: " + request.getParameter("editar"));
+        boolean editar = request.getParameter("editar") != null && !request.getParameter("editar").isBlank();
 
         VehiculoServicio vehiculoServicio = new VehiculoServicio();
 
         Product product = new Product();
-        product.setCategoryId(Integer.parseInt(request.getParameter("categoryId")));
-        product.setName(request.getParameter("name"));
-        product.setSupplier(request.getParameter("supplier"));
         product.setId(Integer.parseInt(request.getParameter("id")));
+        product.setName(request.getParameter("name"));
+        product.setCategoryId(Integer.parseInt(request.getParameter("categoryId")));
+        product.setSupplier(request.getParameter("supplier"));
+        
+        System.out.println("PARÁMETROS RECIBIDOS:");
+        System.out.println("id: " + request.getParameter("id"));
+        System.out.println("name: " + request.getParameter("name"));
+        System.out.println("categoryId: " + request.getParameter("categoryId"));
+        System.out.println("supplier: " + request.getParameter("supplier"));
+
+
+        System.out.println("Datos recibidos para guardar/editar: " + product);
 
         if (!editar) {
             try {
+                System.out.println("Intentando agregar producto");
                 boolean resultado = vehiculoServicio.addVehiculo(product);
-                if (resultado) {
-                    System.out.println("Producto agregado correctamente");
-                }
+                System.out.println("Resultado agregar: " + resultado);
             } catch (Exception ex) {
-                request.setAttribute("mensaje", "Error: " + ex.getMessage());
+                System.out.println("Error en agregar: " + ex.getMessage());
             }
         } else {
             Product productOrigin = new Product();
-            productOrigin.setCategoryId(Integer.parseInt(request.getParameter("marca-o")));
-            productOrigin.setName(request.getParameter("nombreVehiculo-o"));
-            productOrigin.setSupplier(request.getParameter("tipoVehiculo-o"));
-            productOrigin.setId(Integer.parseInt(request.getParameter("yearIntroduccion-o")));
+            productOrigin.setId(Integer.parseInt(request.getParameter("id-o")));
+            productOrigin.setName(request.getParameter("name-o"));
+            productOrigin.setCategoryId(Integer.parseInt(request.getParameter("categoryId-o")));
+            productOrigin.setSupplier(request.getParameter("supplier-o"));
 
+            System.out.println("Datos para editar: original=" + productOrigin + ", nuevo=" + product);
             try {
                 boolean resultado = vehiculoServicio.updateVehiculo(product, productOrigin);
-                if (resultado) {
-                    System.out.println("Vehículo modificado correctamente");
-                }
+                System.out.println("Resultado editar: " + resultado);
             } catch (Exception ex) {
-                request.setAttribute("mensaje", "Error: " + ex.getMessage());
+                System.out.println("Error en editar: " + ex.getMessage());
             }
         }
-        
         response.sendRedirect("SvVehiculos");
-
     }
+
 }

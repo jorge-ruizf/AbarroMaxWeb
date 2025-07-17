@@ -1,9 +1,7 @@
-<%-- 
-    Document   : registro_vehiculos
-    Created on : 16/06/2025, 7:20:22 p. m.
-    Author     : jufeq
---%>
-
+<%@page import="java.util.Arrays"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="java.util.List"%>
+<%@page import="entities.Product"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -18,23 +16,29 @@
                 <div class="col-3">
 
                 </div>
+                <% List<String> categories = new ArrayList<>(Arrays.asList("Ropa", "Medicamentos", "Consumibles")); /*(List<String>) request.getAttribute("products")*/%>
+
                 <div class="col-6 text-start border rounded pt-3 ps-3 pe-3">
                     <form action="SvVehiculos" method="POST">
                         <div class="mb-3">
-                            <label for="formGroupExampleInput" class="form-label">Categoria</label>
-                            <input type="number" class="form-control" name="categoryId" id="formGroupExampleInput" placeholder="Ingrese el ID de una Categoria">
+                            <label for="formGroupExampleInput2" class="form-label">Id</label>
+                            <input type="number" class="form-control" name="id" max="100000" placeholder="Ingrese el Id del producto" value="1" ><!--disabled-->
                         </div>
                         <div class="mb-3">
                             <label for="formGroupExampleInput2" class="form-label">Nombre del Producto</label>
-                            <input type="text" class="form-control" name="name" id="formGroupExampleInput2" placeholder="Ingrese el Nombre del producto">
+                            <input type="text" class="form-control" name="name" maxLenght="50" placeholder="Ingrese el Nombre del producto">
+                        </div>
+                        <div class="mb-3">
+                            <label for="formGroupExampleInput" class="form-label">Categoria</label>
+                            <select class="form-select" name="categoryId" placeholder="Ingrese el ID de una Categoria">
+                                <% for(int i = 0; i < categories.size(); i++){ %>
+                                   <option value="<%=i%>"><%=categories.get(i)%></option>
+                                <%}%>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label for="formGroupExampleInput2" class="form-label">Proveedor</label>
-                            <input type="text" class="form-control" name="supplier" id="formGroupExampleInput2" placeholder="Ingrese el nombre del Proveedor">
-                        </div>
-                        <div class="mb-3">
-                            <label for="formGroupExampleInput2" class="form-label">Id</label>
-                            <input type="number" class="form-control" name="id" id="formGroupExampleInput2" placeholder="Ingrese el Id del product">
+                            <input type="text" class="form-control" name="supplier" maxLenght="50" id="formGroupExampleInput2" placeholder="Ingrese el nombre del Proveedor">
                         </div>
                         <div class="mb-3">
                             <button type="submit" class="btn btn-primary">Guardar</button>

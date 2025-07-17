@@ -14,7 +14,7 @@
                 </div>
                 <div class="col-8">
                     <form method="GET" action="SvVehiculos">
-                        <button type="submit" class="btn btn-primary">Cargar Vehiculos</button>
+                        <button type="submit" class="btn btn-primary">Cargar Productos</button>
                     </form>
                 </div>
                 <div class="col">
